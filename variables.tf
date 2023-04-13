@@ -24,6 +24,12 @@ variable "datacenter_name" {
   description = "DC name in vsphere"
 }
 
+variable "ha_mode" {
+  type        = bool
+  description = "Flag to enable HA Control Plane"
+  default     = false
+}
+
 variable "datastore_name" {
   type        = string
   description = "Datastore name"
