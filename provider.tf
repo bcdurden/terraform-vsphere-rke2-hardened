@@ -15,10 +15,6 @@ terraform {
   }
 }
 
-provider "random" {
-  # Configuration options
-}
-
 provider "vsphere" {
   user                 = var.vsphere_user
   password             = var.vsphere_password
