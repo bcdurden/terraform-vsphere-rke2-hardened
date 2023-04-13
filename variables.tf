@@ -49,6 +49,11 @@ variable "cp_memory_size_mb" {
   description = "Control plane memory size in mb"
 }
 
+variable "cp_disk_size_gb" {
+  type = string
+  description = "Control plane disk size in gb"
+}
+
 variable "worker_cpu_count" {
   type        = string
   description = "Worker cpu count"
@@ -57,6 +62,11 @@ variable "worker_cpu_count" {
 variable "worker_memory_size_mb" {
   type        = string
   description = "Worker memory size in mb"
+}
+
+variable "worker_disk_size_gb" {
+  type = string
+  description = "Worker disk size in gb"
 }
 
 variable "esxi_hosts" {
@@ -96,6 +106,21 @@ variable "kubeconfig_filename" {
 variable "rke2_vip" {
   type        = string
   description = "The VIP - virtual IP to bind the control plane node to"
+}
+
+variable "rke2_registry" {
+  type        = string
+  description = "The system registry to pull images from"
+}
+
+variable "carbide_username" {
+  type        = string
+  description = "The carbide registry username"
+}
+
+variable "carbide_password" {
+  type        = string
+  description = "The carbide registry password"
 }
 
 variable "rke2_vip_interface" {

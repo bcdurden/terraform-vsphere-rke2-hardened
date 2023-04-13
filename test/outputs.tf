@@ -1,11 +1,11 @@
 output "ssh_key" {
-    value = tls_private_key.global_key.private_key_pem
+    value = module.rke2-hardened.ssh_key
     sensitive = true
 }
 output "ssh_pubkey" {
-    value = tls_private_key.global_key.public_key_openssh
+    value = module.rke2-hardened.ssh_pubkey
 }
 output "kubeconfig" {
-    value = local_file.kube_config_server_yaml.filename
+    value = module.rke2-hardened.kubeconfig
     sensitive = true
 }
