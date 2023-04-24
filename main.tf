@@ -51,7 +51,7 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
           owner: root
           content: |
             token: ${var.cluster_token}
-            system-default-registry: ${var.rke2_registry != "" ? var.rke2_registry : null}
+            system-default-registry: ${var.rke2_registry}
             tls-san:
             - ${var.node_prefix}-cp-0
             - ${var.rke2_vip}
@@ -285,7 +285,7 @@ resource "vsphere_virtual_machine" "rke2_worker" {
           content: |
             token: ${var.cluster_token}
             server: https://${var.rke2_vip}:9345
-            system-default-registry: ${var.rke2_registry != "" ? var.rke2_registry : null}
+            system-default-registry: ${var.rke2_registry}
             write-kubeconfig-mode: 0640
             profile: cis-1.6
             kube-apiserver-arg:
