@@ -171,7 +171,7 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
           content: |
             token: ${var.cluster_token}
             server: https://${var.rke2_vip}:9345
-            system-default-registry: ${var.rke2_registry != "" ? var.rke2_registry : null}
+            system-default-registry: ${var.rke2_registry}
             profile: cis-1.6
             selinux: true
             secrets-encryption: true
