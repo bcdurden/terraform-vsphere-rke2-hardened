@@ -3,6 +3,7 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
   datastore_id         = data.vsphere_datastore.datastore.id
   host_system_id       = data.vsphere_host.host.id
   resource_pool_id     = data.vsphere_compute_cluster.cluster.resource_pool_id
+  folder               = "${data.vsphere_datacenter.datacenter.name}/${var.vm_folder}"
 
   wait_for_guest_net_timeout = 5
 
@@ -122,6 +123,7 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
   datastore_id         = data.vsphere_datastore.datastore.id
   host_system_id       = data.vsphere_host.host.id
   resource_pool_id     = data.vsphere_compute_cluster.cluster.resource_pool_id
+  folder               = "${data.vsphere_datacenter.datacenter.name}/${var.vm_folder}"
 
   wait_for_guest_net_timeout = 5
 
@@ -236,6 +238,7 @@ resource "vsphere_virtual_machine" "rke2_worker" {
   datastore_id         = data.vsphere_datastore.datastore.id
   host_system_id       = data.vsphere_host.host.id
   resource_pool_id     = data.vsphere_compute_cluster.cluster.resource_pool_id
+  folder               = "${data.vsphere_datacenter.datacenter.name}/${var.vm_folder}"
 
   wait_for_guest_net_timeout = 5
 

@@ -40,6 +40,12 @@ variable "cluster_name" {
   description = "Cluster name in vsphere"
 }
 
+variable "vm_folder" {
+  type        = string
+  description = "The vSphere VM folder in which to create the cluster"
+  default     = ""
+}
+
 variable "network_name" {
   type        = string
   description = "Network name for cluster"
