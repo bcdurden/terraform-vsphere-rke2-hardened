@@ -1,6 +1,6 @@
 module "rke2-hardened" {
-  source  = "bcdurden/rke2-hardened/vsphere"
-  version = "0.0.10"
+  source  = "../"
+  
   vsphere_user = ""
   vsphere_password = ""
   vsphere_server = "10.0.0.5"
