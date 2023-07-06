@@ -149,3 +149,8 @@ variable "content_library_name" {
   type        = string
   description = "The name of the content library hosting the base images"
 }
+
+variable "os_user" {
+  type        = string
+  description = "The OS-level base username for the VM image (ubuntu for ubuntu, opensuse for SUSE Leap 15)"
+}

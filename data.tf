@@ -31,7 +31,7 @@ data "vsphere_content_library" "content_library" {
   name = var.content_library_name
 }
 
-data "vsphere_content_library_item" "ubuntu_ovf" {
+data "vsphere_content_library_item" "vm_ovf" {
   name       = var.rke2_image_name
   type       = "ovf"
   library_id = data.vsphere_content_library.content_library.id

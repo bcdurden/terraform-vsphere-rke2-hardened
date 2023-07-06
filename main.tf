@@ -23,13 +23,13 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
     connection {
       type        = "ssh"
       host        = self.default_ip_address
-      user        = "ubuntu"
+      user        = var.os_user
       private_key = tls_private_key.global_key.private_key_openssh
     }
   }
 
   clone {
-    template_uuid = data.vsphere_content_library_item.ubuntu_ovf.id
+    template_uuid = data.vsphere_content_library_item.vm_ovf.id
   }
 
   disk {
@@ -39,11 +39,8 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
   cdrom {
     client_device = true
   }
-
-  vapp {
-    properties = {
-      "hostname" = "${var.node_prefix}-cp-0",
-      "user-data" = base64encode( <<EOT
+  extra_config = {
+      "guestinfo.userdata"          = base64encode( <<EOT
         #cloud-config
         package_update: true
         hostname: ${var.node_prefix}-cp-0
@@ -101,16 +98,18 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
         - mkdir -p /var/lib/rancher/rke2/server/manifests/
         - wget https://kube-vip.io/manifests/rbac.yaml -O /var/lib/rancher/rke2/server/manifests/kube-vip-rbac.yaml
         - curl -sL kube-vip.io/k3s |  vipAddress=${var.rke2_vip} vipInterface=${var.rke2_vip_interface} sh | sudo tee /var/lib/rancher/rke2/server/manifests/vip.yaml
-        - cp -f /usr/local/share/rke2/rke2-cis-sysctl.conf /etc/sysctl.d/60-rke2-cis.conf
+        - cp -f $(find / 2> /dev/null | grep rke2-cis-sysctl.conf) /etc/sysctl.d/60-rke2-cis.conf
         - useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U
         - systemctl restart systemd-sysctl
         - systemctl start rke2-server.service
         ssh_authorized_keys: 
         - ${tls_private_key.global_key.public_key_openssh}
       EOT
-      )  
+      )   
+      "guestinfo.userdata.encoding" = "base64"
+      "guestinfo.metadata"          = ""
+      "guestinfo.metadata.encoding" = "base64"
     }
-  }
 }
 
 resource "vsphere_virtual_machine" "rke2_cp_ha" {
@@ -143,13 +142,13 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
     connection {
       type        = "ssh"
       host        = self.default_ip_address
-      user        = "ubuntu"
+      user        = var.os_user
       private_key = tls_private_key.global_key.private_key_openssh
     }
   }
 
   clone {
-    template_uuid = data.vsphere_content_library_item.ubuntu_ovf.id
+    template_uuid = data.vsphere_content_library_item.vm_ovf.id
   }
 
   disk {
@@ -159,11 +158,8 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
   cdrom {
     client_device = true
   }
-
-  vapp {
-    properties = {
-      "hostname" = "${var.node_prefix}-cp-${count.index+1}",
-      "user-data" = base64encode( <<EOT
+  extra_config = {
+      "guestinfo.userdata"          = base64encode( <<EOT
         #cloud-config
         package_update: true
         hostname: ${var.node_prefix}-cp-${count.index+1}
@@ -174,6 +170,9 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
             token: ${var.cluster_token}
             server: https://${var.rke2_vip}:9345
             system-default-registry: ${var.rke2_registry}
+            tls-san:
+            - ${var.node_prefix}-cp-${count.index+1}
+            - ${var.rke2_vip}
             profile: cis-1.6
             selinux: true
             secrets-encryption: true
@@ -216,7 +215,7 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
         runcmd:
         - curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -
         - systemctl enable rke2-server.service
-        - cp -f /usr/local/share/rke2/rke2-cis-sysctl.conf /etc/sysctl.d/60-rke2-cis.conf
+        - cp -f $(find / 2> /dev/null | grep rke2-cis-sysctl.conf) /etc/sysctl.d/60-rke2-cis.conf
         - useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U
         - systemctl restart systemd-sysctl
         - systemctl start rke2-server.service
@@ -224,8 +223,10 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
         - ${tls_private_key.global_key.public_key_openssh}
       EOT
       )  
+      "guestinfo.userdata.encoding" = "base64"
+      "guestinfo.metadata"          = ""
+      "guestinfo.metadata.encoding" = "base64"
     }
-  }
 }
 
 resource "vsphere_virtual_machine" "rke2_worker" {
@@ -258,13 +259,13 @@ resource "vsphere_virtual_machine" "rke2_worker" {
     connection {
       type        = "ssh"
       host        = self.default_ip_address
-      user        = "ubuntu"
+      user        = var.os_user
       private_key = tls_private_key.global_key.private_key_openssh
     }
   }
 
   clone { 
-    template_uuid = data.vsphere_content_library_item.ubuntu_ovf.id
+    template_uuid = data.vsphere_content_library_item.vm_ovf.id
   }
 
   disk {
@@ -274,11 +275,8 @@ resource "vsphere_virtual_machine" "rke2_worker" {
   cdrom {
     client_device = true
   }
-
-  vapp {
-    properties = {
-      "hostname" = "${var.node_prefix}-worker-${count.index}",
-      "user-data" = base64encode( <<EOT
+  extra_config = {
+      "guestinfo.userdata"          = base64encode( <<EOT
         #cloud-config
         package_update: true
         hostname: ${var.node_prefix}-worker-${count.index}
@@ -313,13 +311,15 @@ resource "vsphere_virtual_machine" "rke2_worker" {
         runcmd:
         - curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE="agent" INSTALL_RKE2_VERSION=${var.rke2_version} sh -
         - systemctl enable rke2-agent.service
-        - cp -f /usr/local/share/rke2/rke2-cis-sysctl.conf /etc/sysctl.d/60-rke2-cis.conf
+        - cp -f $(find / 2> /dev/null | grep rke2-cis-sysctl.conf) /etc/sysctl.d/60-rke2-cis.conf
         - systemctl restart systemd-sysctl
         - systemctl start rke2-agent.service
         ssh_authorized_keys: 
         - ${tls_private_key.global_key.public_key_openssh}
       EOT
       )  
+      "guestinfo.userdata.encoding" = "base64"
+      "guestinfo.metadata"          = ""
+      "guestinfo.metadata.encoding" = "base64"
     }
-  }
 }

@@ -1,7 +1,7 @@
 module "rke2-hardened" {
   source  = "../"
   
-  vsphere_user          = ""                        
+  vsphere_user          = ""
   vsphere_password      = ""
   vsphere_server        = ""
   skip_ssl_verify       = true         
@@ -23,12 +23,14 @@ module "rke2-hardened" {
   rke2_version          = "v1.24.9+rke2r2"                # this is the RKE2 version to use
   worker_count          = 3
   rke2_vip              = "10.1.1.4"                      # This is the static VIP (virtual IP) used via kubevip for the RKE2 api server
-  rke2_vip_interface    = "ens192"                        # This is the static VIP physical interface to bind to on the control plane VM(s) used by kubevip
-  rke2_image_name       = "jammy-server-cloudimg-amd64"   # This is the name of the OVA image within the content library
+  rke2_vip_interface    = "eth0"                          # This is the static VIP physical interface to bind to on the control plane VM(s) used by kubevip
+  rke2_image_name       = "suse-leap-15.5"                # This is the name of the OVA image within the content library
   content_library_name  = "cl"
   vm_folder             = ""
 
-  rke2_registry = ""                                      # leave these empty unless you are using carbide or an airgapped registry
-  carbide_username = "" 
-  carbide_password = ""
+  rke2_registry         = ""                              # leave these empty unless you are using carbide or an airgapped registry
+  carbide_username      = "" 
+  carbide_password      = ""
+
+  os_user               = "opensuse"                      # by default we're using SUSE Leap 15.5, so this user is opensuse (for ubuntu it would be ubuntu)
 }
