@@ -1,6 +1,8 @@
 # Hardened RKE2 Cluster on vSphere Terraform Module
 This readme will cover the basics around using this repository locally and examples of how to use it as downloadable module.
 
+WARNING: The module will be updated semi-frequently as new features are needed or bugs are discovered. Some of the more detailed info in this doc will by consequence become obsolete. It is impotant to check the module spec itself to verify.
+
 ## What this Module Does
 The below module will create MOST components within a vSphere environment in order to deploy a configurable and hardened RKE2 cluster. By hardened, this means that the cluster will be compliant with the public DISA STIG for RKE2 1.24. 
 
