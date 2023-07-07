@@ -115,9 +115,9 @@ variable "kubeconfig_filename" {
   default     = "kube_config.yaml"
 }
 
-variable "rke2_vip" {
+variable "rke2_apiserver_lb_ip" {
   type        = string
-  description = "The VIP - virtual IP to bind the control plane node to"
+  description = "The API server LB IP/URL (this is just a SAN entry for TLS)"
 }
 
 variable "rke2_registry" {
@@ -135,9 +135,10 @@ variable "carbide_password" {
   description = "The carbide registry password"
 }
 
-variable "rke2_vip_interface" {
+variable "rke2_interface" {
   type        = string
-  description = "The interface on the control plane node to bind the VIP"
+  description = "The network interface on the control plane VMs to configure for static IPs"
+  default     = "eth0"
 }
 
 variable "rke2_image_name" {
@@ -153,4 +154,24 @@ variable "content_library_name" {
 variable "os_user" {
   type        = string
   description = "The OS-level base username for the VM image (ubuntu for ubuntu, opensuse for SUSE Leap 15)"
+}
+
+variable "cp0_ip_address" {
+  type        = string
+  description = "The static IP address of the first control plane node"
+}
+
+variable "cpha_ip_addresses" {
+  type        = list
+  description = "Two IP addresses as strings for each additional control plane node in an HA configuration"  
+}
+
+variable "network_gateway_ip" {
+  type        = string
+  description = "The IP address of the network gateway for this cluster"
+}
+
+variable "dns_server_ip" {
+  type        = string
+  description = "The DNS IP address for this cluster"
 }

@@ -52,7 +52,8 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
             system-default-registry: ${var.rke2_registry}
             tls-san:
             - ${var.node_prefix}-cp-0
-            - ${var.rke2_vip}
+            - ${var.cp0_ip_address}
+            - ${var.rke2_apiserver_lb_ip}
             profile: cis-1.6
             selinux: true
             secrets-encryption: true
@@ -95,9 +96,6 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
         runcmd:
         - curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=${var.rke2_version} sh -
         - systemctl enable rke2-server.service
-        - mkdir -p /var/lib/rancher/rke2/server/manifests/
-        - wget https://kube-vip.io/manifests/rbac.yaml -O /var/lib/rancher/rke2/server/manifests/kube-vip-rbac.yaml
-        - curl -sL kube-vip.io/k3s |  vipAddress=${var.rke2_vip} vipInterface=${var.rke2_vip_interface} sh | sudo tee /var/lib/rancher/rke2/server/manifests/vip.yaml
         - cp -f $(find / 2> /dev/null | grep rke2-cis-sysctl.conf) /etc/sysctl.d/60-rke2-cis.conf
         - useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U
         - systemctl restart systemd-sysctl
@@ -107,7 +105,18 @@ resource "vsphere_virtual_machine" "rke2_cp_0" {
       EOT
       )   
       "guestinfo.userdata.encoding" = "base64"
-      "guestinfo.metadata"          = ""
+      "guestinfo.metadata"          = base64encode( <<EOT
+        network:
+          version: 2
+          ethernets:
+            ${var.rke2_interface}:
+              addresses:
+                - ${var.cp0_ip_address}/24
+              gateway4: ${var.network_gateway_ip}
+              nameservers:
+                addresses: [${var.dns_server_ip}]
+      EOT
+      )
       "guestinfo.metadata.encoding" = "base64"
     }
 }
@@ -168,11 +177,12 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
           owner: root
           content: |
             token: ${var.cluster_token}
-            server: https://${var.rke2_vip}:9345
+            server: https://${var.cp0_ip_address}:9345
             system-default-registry: ${var.rke2_registry}
             tls-san:
             - ${var.node_prefix}-cp-${count.index+1}
-            - ${var.rke2_vip}
+            - ${var.cpha_ip_addresses[count.index]}
+            - ${var.rke2_apiserver_lb_ip}
             profile: cis-1.6
             selinux: true
             secrets-encryption: true
@@ -224,7 +234,18 @@ resource "vsphere_virtual_machine" "rke2_cp_ha" {
       EOT
       )  
       "guestinfo.userdata.encoding" = "base64"
-      "guestinfo.metadata"          = ""
+      "guestinfo.metadata"          = base64encode( <<EOT
+        network:
+          version: 2
+          ethernets:
+            eth0:
+              addresses:
+                - ${var.cpha_ip_addresses[count.index]}/24
+              gateway4: ${var.network_gateway_ip}
+              nameservers:
+                addresses: [${var.dns_server_ip}]
+      EOT
+      )
       "guestinfo.metadata.encoding" = "base64"
     }
 }
@@ -285,7 +306,7 @@ resource "vsphere_virtual_machine" "rke2_worker" {
           owner: root
           content: |
             token: ${var.cluster_token}
-            server: https://${var.rke2_vip}:9345
+            server: https://${var.cp0_ip_address}:9345
             system-default-registry: ${var.rke2_registry}
             write-kubeconfig-mode: 0640
             profile: cis-1.6
