@@ -22,8 +22,8 @@ module "rke2-hardened" {
   cluster_token         = "mysharedtoken"                 # this is the RKE2 join token and can be any value
   rke2_version          = "v1.24.9+rke2r2"                # this is the RKE2 version to use
   worker_count          = 3
-  rke2_vip              = "10.1.1.4"                      # This is the static VIP (virtual IP) used via kubevip for the RKE2 api server
-  rke2_vip_interface    = "eth0"                          # This is the static VIP physical interface to bind to on the control plane VM(s) used by kubevip
+  rke2_apiserver_lb_ip  = "10.1.1.3"                      # This is the static IP used for the apiserver load balancer
+  rke2_interface        = "eth0"                          # This is the static physical interface to bind to on the control plane VM(s)
   rke2_image_name       = "suse-leap-15.5"                # This is the name of the OVA image within the content library
   content_library_name  = "cl"
   vm_folder             = ""
@@ -33,4 +33,9 @@ module "rke2-hardened" {
   carbide_password      = ""
 
   os_user               = "opensuse"                      # by default we're using SUSE Leap 15.5, so this user is opensuse (for ubuntu it would be ubuntu)
+
+  cp0_ip_address        = "10.1.1.4"
+  network_gateway_ip    = "10.1.1.1"
+  dns_server_ip         = "8.8.8.8"
+  cpha_ip_addresses     = ["10.1.1.5","10.1.1.6"]
 }
